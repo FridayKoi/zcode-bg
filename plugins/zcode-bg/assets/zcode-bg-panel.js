@@ -165,6 +165,8 @@
   }
 
   function findAnchorButton() {
+    // 目标：返回"上传"按钮（插到它前面 = 文件组之后）。
+    // 文件组（文件夹+下拉箭头）可能是一个宽按钮，也可能拆成两个小盒子，按"簇"处理。
     var w = window.innerWidth || 1280;
     var all = document.querySelectorAll('*');
     var boxes = [];
@@ -173,7 +175,7 @@
       if (e.id === 'zcode-bg-toolbar-btn' || e.id === 'zcode-bg-float-btn') continue;
       if (e.closest && e.closest('#zcode-bg-panel')) continue;
       var r = e.getBoundingClientRect();
-      if (r.width < 20 || r.width > 90 || r.height < 20 || r.height > 50) continue;
+      if (r.width < 14 || r.width > 160 || r.height < 18 || r.height > 52) continue;
       if (r.top < -2 || r.top > 48) continue;
       if (r.left < w * 0.5) continue;
       boxes.push(e);
@@ -182,7 +184,16 @@
     boxes.sort(function (a, b) {
       return a.getBoundingClientRect().left - b.getBoundingClientRect().left;
     });
-    return boxes.length >= 2 ? boxes[1] : null;
+    if (boxes.length < 2) return null;
+    // 从左起第一个盒子开始，把间距 <8px 的相邻盒子并入同一簇（文件组）；
+    // 簇后的第一个盒子就是"上传"。
+    var clusterRight = boxes[0].getBoundingClientRect().right;
+    for (var j = 1; j < boxes.length; j++) {
+      var rr = boxes[j].getBoundingClientRect();
+      if (rr.left <= clusterRight + 8) clusterRight = Math.max(clusterRight, rr.right);
+      else return boxes[j];
+    }
+    return null;
   }
 
   function makeFloatButton() {
@@ -195,15 +206,34 @@
     return btn;
   }
 
+  function placeButton(anchor) {
+    var old = document.getElementById('zcode-bg-toolbar-btn');
+    if (old && old.parentNode) old.parentNode.removeChild(old);
+    var btn = makeToolbarButton(anchor);
+    btn.id = 'zcode-bg-toolbar-btn';
+    anchor.parentNode.insertBefore(btn, anchor);
+    var f = document.getElementById('zcode-bg-float-btn');
+    if (f) f.remove();
+  }
+
   function tick() {
     if (!document.getElementById('zcode-bg-toolbar-btn')) {
       var anchor = findAnchorButton();
       if (anchor && anchor.parentNode) {
-        var btn = makeToolbarButton(anchor);
-        btn.id = 'zcode-bg-toolbar-btn';
-        anchor.parentNode.insertBefore(btn, anchor);
-        var f = document.getElementById('zcode-bg-float-btn');
-        if (f) f.remove();
+        placeButton(anchor);
+        // 工具栏结构变化（React 重渲染/按钮增减）时自动归位
+        var parent = anchor.parentNode;
+        if (parent && !parent.__zcodeBgObserver) {
+          parent.__zcodeBgObserver = new MutationObserver(function () {
+            var a = findAnchorButton();
+            if (!a || !a.parentNode) return;
+            var b = document.getElementById('zcode-bg-toolbar-btn');
+            if (!b || b.parentNode !== a.parentNode || b.nextElementSibling !== a) {
+              placeButton(a);
+            }
+          });
+          parent.__zcodeBgObserver.observe(parent, { childList: true });
+        }
       } else {
         tick.tries = (tick.tries || 0) + 1;
         if (tick.tries > 10 && !document.getElementById('zcode-bg-float-btn')) makeFloatButton();
