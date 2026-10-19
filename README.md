@@ -77,6 +77,14 @@ python plugins/zcode-bg/scripts/bg_patch.py rollback   # 还原
 
 ![工具栏调色板按钮](docs/images/toolbar-button.png)
 
+**设置面板**（点击调色板打开，滑杆/数值/预设槽位/壁纸/探针都在这里）：
+
+![设置面板](docs/images/panel.png)
+
+安装后的插件详情页（命令、技能与版本信息）：
+
+![插件详情页](docs/images/plugin-page.jpg)
+
 - **面板**：点击调色板按钮 → 调滑杆/输入数值/选壁纸/存槽位；
 - **对话命令**（安装后以 `/bg-` 开头）：`/bg-apply`、`/bg-rollback`、`/bg-status`、
   `/bg-preset`、`/bg-wallpaper`、`/bg-alpha`、`/bg-check-update`、`/bg-update`；

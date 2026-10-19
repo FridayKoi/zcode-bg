@@ -70,6 +70,14 @@ The panel entry lives in the toolbar — the palette icon **between the folder a
 
 ![Toolbar palette button](docs/images/toolbar-button.png)
 
+**Settings panel** (opened via the palette button — sliders, numeric inputs, preset slots, wallpaper, probe):
+
+![Settings panel](docs/images/panel.png)
+
+Plugin detail page after install (commands, skill and version info):
+
+![Plugin detail page](docs/images/plugin-page.jpg)
+
 - **Panel**: click the palette button → sliders / numeric inputs / wallpaper picker / preset slots
 - **Commands** (after install): `/bg-apply`, `/bg-rollback`, `/bg-status`, `/bg-preset`, `/bg-wallpaper`, `/bg-alpha`, `/bg-check-update`, `/bg-update`
 - **Pure mode**: button in the panel's "Diagnostics" section — restores the stock look while keeping your settings; exit anytime
