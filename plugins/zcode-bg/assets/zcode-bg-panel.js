@@ -254,7 +254,7 @@
            'font:12.5px/1.65 system-ui,"Segoe UI",sans-serif;padding:16px;display:none;' +
            'box-shadow:0 12px 48px rgba(0,0,0,.45);',
     title: 'display:flex;align-items:center;gap:8px;font-weight:700;font-size:14px;margin:0 2px 4px;',
-    ver: 'font-size:10px;opacity:.35;font-weight:400;',
+    ver: 'font-size:10px;opacity:.35;font-weight:400;margin-left:4px;white-space:nowrap;',
     close: 'margin-left:auto;cursor:pointer;opacity:.55;font-size:13px;width:24px;height:24px;' +
            'display:flex;align-items:center;justify-content:center;border-radius:8px;',
     card: 'background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.06);' +
@@ -369,7 +369,7 @@
     var title = el('div', CSS.title);
     title.appendChild(el('span', null, '🎨'));
     title.appendChild(el('span', null, '背景主题'));
-    title.appendChild(el('span', CSS.ver, 'v' + PANEL_VER));
+    title.appendChild(el('span', CSS.ver, 'v' + (window.__zcodeBgPluginVer || PANEL_VER)));
     var x = el('span', CSS.close, '✕');
     x.onclick = function () { togglePanel(false); };
     title.appendChild(x);

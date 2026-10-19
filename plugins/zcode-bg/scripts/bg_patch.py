@@ -43,6 +43,24 @@ CONFIG_FILE = PLUGIN_DIR / "config.json"       # 可选：{"asar_path": "..."}
 IMG_EXTS = {"jpg", "jpeg", "png", "webp", "gif", "bmp"}
 
 
+def _plugin_version(plugin_dir: Path | None = None) -> str:
+    try:
+        p = (plugin_dir or PLUGIN_DIR) / ".zcode-plugin" / "plugin.json"
+        return json.loads(p.read_text(encoding="utf-8")).get("version", "0.0.0")
+    except Exception:
+        return "0.0.0"
+
+
+def _copy_panel(renderer: Path, src_panel: Path, version: str):
+    """复制面板脚本，并在开头写入真实插件版本号（面板标题显示用）。"""
+    banner = f'window.__zcodeBgPluginVer = "{version}";\n'
+    try:
+        content = src_panel.read_text(encoding="utf-8")
+        (renderer / "zcode-bg-panel.js").write_text(banner + content, encoding="utf-8")
+    except Exception:
+        shutil.copy2(src_panel, renderer / "zcode-bg-panel.js")
+
+
 def _asar_candidates():
     """按优先级生成候选路径：环境变量 → 插件配置 → 常见安装位置 → 运行中进程。"""
     out, seen = [], set()
@@ -251,7 +269,7 @@ def hot_engine(a):
         changed = True
     panel_src = Path(__file__).resolve().parent.parent / "assets" / "zcode-bg-panel.js"
     if panel_src.exists():
-        shutil.copy2(panel_src, renderer / "zcode-bg-panel.js")
+        _copy_panel(renderer, panel_src, _plugin_version())
         if "zcode-bg-panel.js" not in html:
             html = html.replace("</head>",
                 '    <script defer src="./zcode-bg-panel.js"></script>\n  </head>', 1)
@@ -465,7 +483,7 @@ def cmd_apply(a):
         changed = True
     panel_src = Path(__file__).resolve().parent.parent / "assets" / "zcode-bg-panel.js"
     if panel_src.exists():
-        shutil.copy2(panel_src, renderer / "zcode-bg-panel.js")
+        _copy_panel(renderer, panel_src, _plugin_version())
         if "zcode-bg-panel.js" not in html:
             html = html.replace("</head>",
                 '    <script defer src="./zcode-bg-panel.js"></script>\n  </head>', 1)
@@ -587,7 +605,7 @@ def cmd_update(a):
         if (app_dir / "package.json").exists() and (renderer / "index.html").exists():
             src_panel = new_plugin / "assets" / "zcode-bg-panel.js"
             if src_panel.exists():
-                shutil.copy2(src_panel, renderer / "zcode-bg-panel.js")
+                _copy_panel(renderer, src_panel, _plugin_version(new_plugin))
                 print("已热替换注入的面板脚本：重启 ZCode 生效。")
                 print("（插件包本体请在客户端插件市场更新，以获得新命令/技能文档）")
                 return
