@@ -60,7 +60,11 @@ python plugins/zcode-bg/scripts/bg_patch.py rollback   # restore
 
 ## Usage
 
-- **Panel**: toolbar palette button → sliders / numeric inputs / wallpaper picker / preset slots
+The panel entry lives in the toolbar — the palette icon **between the folder and upload buttons**:
+
+![Toolbar palette button](docs/images/toolbar-button.png)
+
+- **Panel**: click the palette button → sliders / numeric inputs / wallpaper picker / preset slots
 - **Commands** (after install): `/bg-apply`, `/bg-rollback`, `/bg-status`, `/bg-preset`, `/bg-wallpaper`, `/bg-alpha`
 - **Pure mode**: button in the panel's "Diagnostics" section — restores the stock look while keeping your settings; exit anytime
 
