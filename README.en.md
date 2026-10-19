@@ -18,7 +18,7 @@ A **wallpaper + translucent glass theme** for the [ZCode](https://zcode.z.ai) de
 - ⚡ **Hot CSS reload**: changes apply in ~2 seconds, no ZCode restart
 - 🧪 **Color probe**: click any UI region to dump 12 ancestor layers (classes + backgrounds) for self-diagnosis
 - 🧯 **Pure mode**: restore the stock ZCode look (wallpaper hidden) with one click, exit anytime
-- 🔒 **Zero telemetry, zero uploads**: everything stays local (the only network call is `npx` fetching the pinned official asar tool)
+- 🔒 **Zero telemetry, zero uploads**: everything stays local; the only network activity is `npx` fetching the pinned official asar tool, plus explicit `/bg-check-update` / `/bg-update` calls to GitHub (no local data sent)
 
 ## How it works (fully auditable)
 
@@ -65,7 +65,7 @@ The panel entry lives in the toolbar — the palette icon **between the folder a
 ![Toolbar palette button](docs/images/toolbar-button.png)
 
 - **Panel**: click the palette button → sliders / numeric inputs / wallpaper picker / preset slots
-- **Commands** (after install): `/bg-apply`, `/bg-rollback`, `/bg-status`, `/bg-preset`, `/bg-wallpaper`, `/bg-alpha`
+- **Commands** (after install): `/bg-apply`, `/bg-rollback`, `/bg-status`, `/bg-preset`, `/bg-wallpaper`, `/bg-alpha`, `/bg-check-update`, `/bg-update`
 - **Pure mode**: button in the panel's "Diagnostics" section — restores the stock look while keeping your settings; exit anytime
 
 ## Risks & disclaimer

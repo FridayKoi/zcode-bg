@@ -19,7 +19,7 @@
 - ⚡ **CSS 热更新**：改参数约 2 秒生效，无需重启 ZCode
 - 🧪 **取色探针**：点任意界面区域，输出 12 层祖先的类名与背景，遇到不听话的区域可自助定位
 - 🧯 **纯净模式**：一键恢复 ZCode 原版外观（含隐藏壁纸），随时退出
-- 🔒 **零遥测、零上传**：所有数据留在本机（唯一网络请求是 npx 拉取固定版本的官方 asar 工具）
+- 🔒 **零遥测、零上传**：所有数据留在本机；仅有的联网场景是 npx 拉取固定版本官方 asar 工具、以及显式执行 `/bg-check-update`、`/bg-update` 时访问 GitHub（不发送本地数据）
 
 ## 原理（完全可审计）
 
@@ -73,7 +73,7 @@ python plugins/zcode-bg/scripts/bg_patch.py rollback   # 还原
 
 - **面板**：点击调色板按钮 → 调滑杆/输入数值/选壁纸/存槽位；
 - **对话命令**（安装后以 `/bg-` 开头）：`/bg-apply`、`/bg-rollback`、`/bg-status`、
-  `/bg-preset`、`/bg-wallpaper`、`/bg-alpha`；
+  `/bg-preset`、`/bg-wallpaper`、`/bg-alpha`、`/bg-check-update`、`/bg-update`；
 - **纯净模式**：面板「诊断」区按钮，恢复原版外观且保留你的参数，随时取回。
 
 ## 风险与免责

@@ -25,6 +25,8 @@ import os
 import shutil
 import subprocess
 import sys
+import urllib.request
+import zipfile
 from datetime import date
 from pathlib import Path
 
@@ -468,6 +470,101 @@ def cmd_rollback(a):
     print(f"解包目录 {app} 保留未动（不影响运行，下次 apply 会重新解包覆盖）")
 
 
+# ---------- 更新检查 ----------
+RELEASE_API = "https://api.github.com/repos/FridayKoi/zcode-bg/releases/latest"
+UPDATE_DIR = Path(os.environ.get("LOCALAPPDATA", str(Path.home()))) / "zcode-bg"
+
+
+def _http_get(url: str, timeout: int = 15) -> bytes:
+    req = urllib.request.Request(url, headers={"User-Agent": "zcode-bg"})
+    with urllib.request.urlopen(req, timeout=timeout) as r:
+        return r.read()
+
+
+def _local_version() -> str:
+    try:
+        p = PLUGIN_DIR / ".zcode-plugin" / "plugin.json"
+        return json.loads(p.read_text(encoding="utf-8")).get("version", "0.0.0")
+    except Exception:
+        return "0.0.0"
+
+
+def _ver_tuple(v: str):
+    out = []
+    for part in v.strip().lstrip("v").split("."):
+        num = "".join(ch for ch in part if ch.isdigit())
+        out.append(int(num) if num else 0)
+    return tuple(out)
+
+
+def _latest_release():
+    rel = json.loads(_http_get(RELEASE_API).decode("utf-8"))
+    tag = (rel.get("tag_name") or "").lstrip("v")
+    asset = next((x for x in rel.get("assets", [])
+                  if (x.get("name") or "").endswith(".zip")), None)
+    return tag, rel.get("html_url", ""), asset
+
+
+def cmd_check_update(a):
+    local = _local_version()
+    try:
+        latest, url, asset = _latest_release()
+    except Exception as e:
+        die(f"检查更新失败（网络/GitHub API 不可用）：{e}")
+    print(f"当前版本: v{local}")
+    print(f"最新版本: v{latest}")
+    if _ver_tuple(latest) > _ver_tuple(local):
+        print("发现新版本。")
+        print(f"Release: {url}")
+        if asset:
+            print(f"下载: {asset.get('browser_download_url')}")
+        print("更新：python bg_patch.py update（或客户端插件市场更新）")
+    else:
+        print("已是最新版本。")
+
+
+def cmd_update(a):
+    local = _local_version()
+    try:
+        latest, url, asset = _latest_release()
+    except Exception as e:
+        die(f"检查更新失败（网络/GitHub API 不可用）：{e}")
+    if not asset:
+        die("最新 Release 没有 zip 资产，请前往 Release 页面手动下载")
+    if _ver_tuple(latest) <= _ver_tuple(local) and not a.force:
+        print(f"已是最新版本 v{local}（可用 --force 强制重新下载）")
+        return
+    target = UPDATE_DIR / f"v{latest}"
+    target.mkdir(parents=True, exist_ok=True)
+    zip_path = target / asset["name"]
+    print(f"下载 {asset['browser_download_url']} ...")
+    zip_path.write_bytes(_http_get(asset["browser_download_url"], timeout=90))
+    unpack = target / "unpacked"
+    if unpack.exists():
+        shutil.rmtree(unpack)
+    with zipfile.ZipFile(zip_path) as z:
+        z.extractall(unpack)
+    new_plugin = unpack / "plugins" / "zcode-bg"
+    if not (new_plugin / "scripts" / "bg_patch.py").exists():
+        die("下载包结构异常（缺少 plugins/zcode-bg）")
+    print(f"已解压到: {new_plugin}")
+    # 补丁已启用时：热替换渲染层面板脚本，重启生效（不动 asar、不动插件缓存）
+    asar = resolve_asar(a.asar)
+    if asar:
+        resources = asar.parent
+        app_dir = resources / "app"
+        renderer = app_dir / "out" / "renderer"
+        if (app_dir / "package.json").exists() and (renderer / "index.html").exists():
+            src_panel = new_plugin / "assets" / "zcode-bg-panel.js"
+            if src_panel.exists():
+                shutil.copy2(src_panel, renderer / "zcode-bg-panel.js")
+                print("已热替换注入的面板脚本：重启 ZCode 生效。")
+                print("（插件包本体请在客户端插件市场更新，以获得新命令/技能文档）")
+                return
+    print("当前未启用主题补丁。请完全退出 ZCode 后，用新版本执行：")
+    print(f'  python "{new_plugin}\\scripts\\bg_patch.py" apply --wallpaper <图片> --preset balanced')
+
+
 def main():
     ap = argparse.ArgumentParser(description="zcode-bg 背景主题补丁工具")
     ap.add_argument("--asar", help="resources/app.asar 的路径（默认本机安装位置）")
@@ -479,6 +576,9 @@ def main():
                       choices=list(PRESETS), help="透明度预设档位")
     aply.add_argument("--css", help="使用自定义 CSS 替代预设生成")
     sub.add_parser("rollback", help="还原 app.asar")
+    sub.add_parser("check-update", help="检查 GitHub 是否有新版本（只读）")
+    up = sub.add_parser("update", help="下载最新版并热替换面板脚本")
+    up.add_argument("--force", action="store_true", help="即使已是最新也强制重新下载")
     hot = sub.add_parser("hot", help="免重启的实时调整（需先装热更新引擎并重启过一次）")
     hot_sub = hot.add_subparsers(dest="hotcmd", required=True)
     hot_sub.add_parser("engine", help="把热更新引擎注入 index.html").set_defaults(func=hot_engine)
@@ -496,7 +596,8 @@ def main():
     if a.cmd == "hot":
         a.func(a)
     else:
-        {"detect": cmd_detect, "apply": cmd_apply, "rollback": cmd_rollback}[a.cmd](a)
+        {"detect": cmd_detect, "apply": cmd_apply, "rollback": cmd_rollback,
+         "check-update": cmd_check_update, "update": cmd_update}[a.cmd](a)
 
 
 if __name__ == "__main__":
