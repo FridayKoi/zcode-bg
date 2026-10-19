@@ -67,6 +67,7 @@ The panel entry lives in the toolbar — the palette icon **between the folder a
 - **Panel**: click the palette button → sliders / numeric inputs / wallpaper picker / preset slots
 - **Commands** (after install): `/bg-apply`, `/bg-rollback`, `/bg-status`, `/bg-preset`, `/bg-wallpaper`, `/bg-alpha`, `/bg-check-update`, `/bg-update`
 - **Pure mode**: button in the panel's "Diagnostics" section — restores the stock look while keeping your settings; exit anytime
+- **Progress window**: running apply/rollback while ZCode is open pops a progress window and completes after you fully quit; it shows every step and any error. Do not reopen ZCode before it finishes.
 
 ## Risks & disclaimer
 

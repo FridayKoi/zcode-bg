@@ -75,6 +75,8 @@ python plugins/zcode-bg/scripts/bg_patch.py rollback   # 还原
 - **对话命令**（安装后以 `/bg-` 开头）：`/bg-apply`、`/bg-rollback`、`/bg-status`、
   `/bg-preset`、`/bg-wallpaper`、`/bg-alpha`、`/bg-check-update`、`/bg-update`；
 - **纯净模式**：面板「诊断」区按钮，恢复原版外观且保留你的参数，随时取回。
+- **进度窗口**：ZCode 运行时执行 apply/rollback 会自动弹出进度窗口，完全退出 ZCode 后自动完成；
+  窗口会显示每一步和错误信息，**完成前请勿提前重开 ZCode**。
 
 ## 风险与免责
 

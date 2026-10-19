@@ -1,5 +1,5 @@
 ---
-description: 给 ZCode 桌面端应用壁纸与半透明主题（需要关闭 ZCode 后执行脚本）
+description: 给 ZCode 桌面端应用壁纸与半透明主题（自动弹出进度窗口，退出 ZCode 后自动完成）
 argument-hint: [壁纸图片路径] [subtle|balanced|immersive]
 ---
 
@@ -8,9 +8,9 @@ argument-hint: [壁纸图片路径] [subtle|balanced|immersive]
 执行流程：
 
 1. 若参数里没有壁纸路径，先向用户确认用哪张图（本地路径）。
-2. 若参数里没有档位，默认 balanced，并向用户确认（subtle=含蓄 / balanced=平衡 / immersive=沉浸）。
-3. 检查 `python "${ZCODE_PLUGIN_ROOT}/scripts/bg_patch.py" detect`：
-   - 如果 `zcode_running` 为 true，告知用户：请完全退出 ZCode（托盘右键退出）。退出后本会话会中断，用户重开后说"继续"，再执行第 4 步。
-   - 如果 `patch_enabled(app.asar.disabled)` 为 true，先提醒用户需要 rollback 才能换新主题。
-4. ZCode 已关闭时执行 apply（壁纸路径 + --preset），确认五步全部 [成功]。
-5. 指导用户重新打开 ZCode，查看效果。若壁纸太透/太实、文字难读，按 skills/zcode-bg/SKILL.md 的微调表调整 preset 或生成自定义 CSS 重新 apply。
+2. 若参数里没有档位，默认 balanced（subtle=含蓄 / balanced=平衡 / immersive=沉浸）。
+3. 运行 `python "${ZCODE_PLUGIN_ROOT}/scripts/bg_patch.py" apply --wallpaper "<图>" --preset <档>`。
+   - 若输出"已弹出进度窗口"：告知用户**完全退出 ZCode（托盘右键退出）**，窗口会自动完成安装；
+     完成后重新打开 ZCode 即可。**完成前不要提前重开**（会中断 asar 改名步骤）。
+   - 若直接输出五步成功：说明执行时 ZCode 已退出，让用户重开验证即可。
+4. 用户重开后验证：壁纸、面板、状态条。不满意用 hot 命令或面板微调。

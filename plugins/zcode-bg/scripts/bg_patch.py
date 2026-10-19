@@ -25,6 +25,7 @@ import os
 import shutil
 import subprocess
 import sys
+import time
 import urllib.request
 import zipfile
 from datetime import date
@@ -389,7 +390,23 @@ def cmd_apply(a):
     index = renderer / "index.html"
 
     if zcode_running():
-        die("ZCode 正在运行。请先完全退出（托盘右键退出），再执行本命令")
+        if getattr(a, "wait", False):
+            print("等待 ZCode 完全退出（托盘右键退出）... 窗口会自动继续。")
+            while zcode_running():
+                time.sleep(2)
+            time.sleep(3)
+            print("ZCode 已退出，开始应用主题...")
+        else:
+            child = [sys.executable, str(Path(__file__).resolve()),
+                     "--asar", str(asar), "apply", "--wait",
+                     "--wallpaper", str(Path(a.wallpaper).resolve()),
+                     "--preset", a.preset]
+            if getattr(a, "css", None):
+                child += ["--css", str(Path(a.css).resolve())]
+            subprocess.Popen(child, creationflags=getattr(subprocess, "CREATE_NEW_CONSOLE", 0))
+            print("已弹出进度窗口：请完全退出 ZCode（托盘右键退出），")
+            print("窗口会自动完成安装，之后重新打开 ZCode 即可看到效果。")
+            return
     if disabled.exists():
         die("补丁已启用（app.asar.disabled 已存在）。如需换主题/换图，请先 rollback 再 apply")
     if not asar.exists():
@@ -462,7 +479,17 @@ def cmd_rollback(a):
     asar, resources, app = paths(a.asar)
     disabled = asar.with_name("app.asar.disabled")
     if zcode_running():
-        die("ZCode 正在运行。请先完全退出（托盘右键退出），再执行本命令")
+        if getattr(a, "wait", False):
+            print("等待 ZCode 完全退出（托盘右键退出）... 窗口会自动继续。")
+            while zcode_running():
+                time.sleep(2)
+            time.sleep(3)
+        else:
+            child = [sys.executable, str(Path(__file__).resolve()),
+                     "--asar", str(asar), "rollback", "--wait"]
+            subprocess.Popen(child, creationflags=getattr(subprocess, "CREATE_NEW_CONSOLE", 0))
+            print("已弹出进度窗口：请完全退出 ZCode，窗口会自动完成还原。")
+            return
     if not disabled.exists():
         die("没有找到 app.asar.disabled，说明当前没有启用的背景补丁")
     disabled.rename(asar)
@@ -575,7 +602,9 @@ def main():
     aply.add_argument("--preset", default="balanced",
                       choices=list(PRESETS), help="透明度预设档位")
     aply.add_argument("--css", help="使用自定义 CSS 替代预设生成")
-    sub.add_parser("rollback", help="还原 app.asar")
+    aply.add_argument("--wait", action="store_true", help=argparse.SUPPRESS)
+    rb = sub.add_parser("rollback", help="还原 app.asar")
+    rb.add_argument("--wait", action="store_true", help=argparse.SUPPRESS)
     sub.add_parser("check-update", help="检查 GitHub 是否有新版本（只读）")
     up = sub.add_parser("update", help="下载最新版并热替换面板脚本")
     up.add_argument("--force", action="store_true", help="即使已是最新也强制重新下载")
@@ -593,11 +622,19 @@ def main():
     ha.add_argument("--reset", action="store_true")
     ha.set_defaults(func=hot_alpha)
     a = ap.parse_args()
-    if a.cmd == "hot":
-        a.func(a)
-    else:
-        {"detect": cmd_detect, "apply": cmd_apply, "rollback": cmd_rollback,
-         "check-update": cmd_check_update, "update": cmd_update}[a.cmd](a)
+    try:
+        if a.cmd == "hot":
+            a.func(a)
+        else:
+            {"detect": cmd_detect, "apply": cmd_apply, "rollback": cmd_rollback,
+             "check-update": cmd_check_update, "update": cmd_update}[a.cmd](a)
+    finally:
+        # 进度窗口模式下，无论成功失败都停留，避免用户什么都看不到
+        if getattr(a, "wait", False):
+            try:
+                input("\n处理结束，按回车关闭此窗口...")
+            except EOFError:
+                pass
 
 
 if __name__ == "__main__":
