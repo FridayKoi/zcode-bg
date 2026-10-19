@@ -388,6 +388,9 @@ def cmd_apply(a):
     disabled = asar.with_name("app.asar.disabled")
     renderer = app / "out" / "renderer"
     index = renderer / "index.html"
+    # 未指定壁纸时使用插件自带默认壁纸，普通用户零参数即可应用
+    wallpaper = (Path(a.wallpaper).resolve() if a.wallpaper
+                 else (PLUGIN_DIR / "assets" / "default-wallpaper.jpg"))
 
     if zcode_running():
         if getattr(a, "wait", False):
@@ -399,7 +402,7 @@ def cmd_apply(a):
         else:
             child = [sys.executable, str(Path(__file__).resolve()),
                      "--asar", str(asar), "apply", "--wait",
-                     "--wallpaper", str(Path(a.wallpaper).resolve()),
+                     "--wallpaper", str(wallpaper),
                      "--preset", a.preset]
             if getattr(a, "css", None):
                 child += ["--css", str(Path(a.css).resolve())]
@@ -598,7 +601,7 @@ def main():
     sub = ap.add_subparsers(dest="cmd", required=True)
     sub.add_parser("detect", help="只读检查状态")
     aply = sub.add_parser("apply", help="应用壁纸主题")
-    aply.add_argument("--wallpaper", required=True, help="壁纸图片路径")
+    aply.add_argument("--wallpaper", help="壁纸图片路径（省略则用插件自带默认壁纸）")
     aply.add_argument("--preset", default="balanced",
                       choices=list(PRESETS), help="透明度预设档位")
     aply.add_argument("--css", help="使用自定义 CSS 替代预设生成")

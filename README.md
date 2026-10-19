@@ -67,6 +67,12 @@ python plugins/zcode-bg/scripts/bg_patch.py rollback   # 还原
 
 ## 使用
 
+**首次使用（普通用户三步）**：
+
+1. 在 ZCode 对话框输入 `/bg-apply`（无需提供图片，使用插件自带默认壁纸）；
+2. 会弹出**进度窗口**，此时完全退出 ZCode（托盘右键退出），窗口会自动完成安装；
+3. 重新打开 ZCode，主题生效。之后换图/调参都在面板里完成（工具栏调色板按钮）。
+
 面板入口在工具栏——**文件夹与上传按钮之间**那个调色板图标：
 
 ![工具栏调色板按钮](docs/images/toolbar-button.png)

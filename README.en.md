@@ -60,6 +60,12 @@ python plugins/zcode-bg/scripts/bg_patch.py rollback   # restore
 
 ## Usage
 
+**First run (three steps for regular users)**:
+
+1. Type `/bg-apply` in the ZCode chat (no image needed — a bundled default wallpaper is used);
+2. A **progress window** pops up; fully quit ZCode (tray → Quit) and the window completes the install automatically;
+3. Reopen ZCode — theme applied. Afterwards use the panel (toolbar palette button) to change wallpaper/tune.
+
 The panel entry lives in the toolbar — the palette icon **between the folder and upload buttons**:
 
 ![Toolbar palette button](docs/images/toolbar-button.png)
