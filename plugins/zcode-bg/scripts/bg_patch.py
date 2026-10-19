@@ -575,9 +575,9 @@ def cmd_update(a):
     if not (new_plugin / "scripts" / "bg_patch.py").exists():
         die("下载包结构异常（缺少 plugins/zcode-bg）")
     print(f"已解压到: {new_plugin}")
-    # 补丁已启用时：热替换渲染层面板脚本，重启生效（不动 asar、不动插件缓存）
+    # 仅当补丁真正启用（asar 已停用）时才热替换面板脚本；否则说明需先 apply
     asar = resolve_asar(a.asar)
-    if asar:
+    if asar and asar.with_name("app.asar.disabled").exists():
         resources = asar.parent
         app_dir = resources / "app"
         renderer = app_dir / "out" / "renderer"
