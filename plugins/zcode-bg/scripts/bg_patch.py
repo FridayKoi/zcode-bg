@@ -61,6 +61,51 @@ def _copy_panel(renderer: Path, src_panel: Path, version: str):
         shutil.copy2(src_panel, renderer / "zcode-bg-panel.js")
 
 
+def _plugins_root() -> Path | None:
+    """从脚本位置推断客户端插件根目录（.../plugins/cache/<市场>/<插件>/<版本>）。"""
+    parts = PLUGIN_DIR.parts
+    try:
+        idx = parts.index("cache")
+        return Path(*parts[:idx])
+    except ValueError:
+        return None
+
+
+def _register_package(new_plugin: Path, version: str):
+    """把新版本写入客户端插件缓存目录，并更新 installed_plugins.json（先备份）。"""
+    root = _plugins_root()
+    if root is None:
+        print("（当前从非市场目录运行，跳过客户端插件记录同步）")
+        return
+    inst = root / "installed_plugins.json"
+    if not inst.exists():
+        print("（未找到 installed_plugins.json，跳过插件记录同步）")
+        return
+    try:
+        data = json.loads(inst.read_text(encoding="utf-8"))
+        entry = next(p for p in data.get("plugins", [])
+                     if "zcode-bg@" in (p.get("id") or ""))
+    except Exception as e:
+        print(f"（读取插件记录失败，跳过：{e}）")
+        return
+    try:
+        target_parent = Path(entry["installPath"]).parent
+        new_dir = target_parent / version
+        if not new_dir.exists():
+            shutil.copytree(new_plugin, new_dir)
+        bak = inst.with_name(inst.name + ".bak")
+        shutil.copy2(inst, bak)
+        entry["version"] = version
+        entry["installPath"] = str(new_dir)
+        entry["updatedAt"] = time.strftime("%Y-%m-%dT%H:%M:%S.000Z", time.gmtime())
+        tmp = inst.with_name(inst.name + ".tmp")
+        tmp.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
+        os.replace(tmp, inst)
+        print(f"已同步插件包到客户端记录：v{version}（重启后设置页显示新版本）")
+    except Exception as e:
+        print(f"（同步插件记录失败，可改为在市场卸载重装：{e}）")
+
+
 def _asar_candidates():
     """按优先级生成候选路径：环境变量 → 插件配置 → 常见安装位置 → 运行中进程。"""
     out, seen = [], set()
@@ -572,6 +617,22 @@ def cmd_check_update(a):
 
 
 def cmd_update(a):
+    if zcode_running() and not getattr(a, "wait", False):
+        child = [sys.executable, str(Path(__file__).resolve()), "update", "--wait"]
+        if getattr(a, "force", False):
+            child.append("--force")
+        if a.asar:
+            child += ["--asar", str(a.asar)]
+        subprocess.Popen(child, creationflags=getattr(subprocess, "CREATE_NEW_CONSOLE", 0))
+        print("已弹出更新窗口：请完全退出 ZCode（托盘右键退出），")
+        print("窗口会自动完成更新（含客户端插件记录）；完成后重新打开 ZCode 即可。")
+        return
+    if getattr(a, "wait", False):
+        print("等待 ZCode 完全退出（托盘右键退出）... 窗口会自动继续。")
+        while zcode_running():
+            time.sleep(2)
+        time.sleep(3)
+        print("ZCode 已退出，开始更新...")
     local = _local_version()
     try:
         latest, url, asset = _latest_release()
@@ -607,10 +668,11 @@ def cmd_update(a):
             if src_panel.exists():
                 _copy_panel(renderer, src_panel, _plugin_version(new_plugin))
                 print("已热替换注入的面板脚本：重启 ZCode 生效。")
-                print("（插件包本体请在客户端插件市场更新，以获得新命令/技能文档）")
+                _register_package(new_plugin, latest)
                 return
-    print("当前未启用主题补丁。请完全退出 ZCode 后，用新版本执行：")
-    print(f'  python "{new_plugin}\\scripts\\bg_patch.py" apply --wallpaper <图片> --preset balanced')
+    print("当前未启用主题补丁。插件包与记录将直接同步，主题需另行 apply：")
+    _register_package(new_plugin, latest)
+    print(f'  python "{new_plugin}\\scripts\\bg_patch.py" apply --preset balanced')
 
 
 def main():
@@ -627,8 +689,9 @@ def main():
     rb = sub.add_parser("rollback", help="还原 app.asar")
     rb.add_argument("--wait", action="store_true", help=argparse.SUPPRESS)
     sub.add_parser("check-update", help="检查 GitHub 是否有新版本（只读）")
-    up = sub.add_parser("update", help="下载最新版并热替换面板脚本")
+    up = sub.add_parser("update", help="下载最新版并同步面板与客户端插件记录")
     up.add_argument("--force", action="store_true", help="即使已是最新也强制重新下载")
+    up.add_argument("--wait", action="store_true", help=argparse.SUPPRESS)
     hot = sub.add_parser("hot", help="免重启的实时调整（需先装热更新引擎并重启过一次）")
     hot_sub = hot.add_subparsers(dest="hotcmd", required=True)
     hot_sub.add_parser("engine", help="把热更新引擎注入 index.html").set_defaults(func=hot_engine)
