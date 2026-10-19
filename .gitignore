@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+plugins/zcode-bg/config.json
+plugins/zcode-bg/scripts/state.json
+dist/
+.DS_Store
+Thumbs.db

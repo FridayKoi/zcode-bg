@@ -1,0 +1,15 @@
+{
+  "name": "zcode-bg-marketplace",
+  "owner": {
+    "name": "AXX"
+  },
+  "description": "zcode-bg：ZCode 桌面端壁纸与半透明主题（第三方、可逆、零遥测）",
+  "pluginRoot": "./plugins",
+  "plugins": [
+    {
+      "name": "zcode-bg",
+      "source": "./plugins/zcode-bg",
+      "description": "壁纸 + 半透明毛玻璃主题：7 项透明度、5 槽预设、热更新、纯净模式、取色探针"
+    }
+  ]
+}
