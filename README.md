@@ -1,5 +1,7 @@
 # zcode-bg
 
+[中文](README.md) | [English](README.en.md)
+
 给 [ZCode](https://zcode.z.ai) 桌面端换上**壁纸 + 半透明毛玻璃主题**，并且**一键可逆**。
 
 > ⚠️ 第三方非官方插件。它会修改 ZCode 客户端的资源文件（方式见下文「原理」），
