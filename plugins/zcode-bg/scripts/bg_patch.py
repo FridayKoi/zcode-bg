@@ -63,6 +63,12 @@ def _asar_candidates():
             add(cfg["asar_path"])
     except Exception:
         pass
+    if sys.platform == "darwin":
+        add("/Applications/ZCode.app/Contents/Resources/app.asar")
+        add(Path.home() / "Applications/ZCode.app/Contents/Resources/app.asar")
+    elif sys.platform.startswith("linux"):
+        add("/opt/ZCode/resources/app.asar")
+        add(Path.home() / ".local/share/ZCode/resources/app.asar")
     la = os.environ.get("LOCALAPPDATA")
     pf = os.environ.get("ProgramFiles")
     if la:
@@ -73,16 +79,17 @@ def _asar_candidates():
         add(Path(f"{letter}:/ZCode/resources/app.asar"))
         add(Path(f"{letter}:/Program Files/ZCode/resources/app.asar"))
         add(Path(f"{letter}:/App tools/ZCode/resources/app.asar"))
-    try:  # Windows：按运行中进程的 exe 位置定位（最准）
-        r = subprocess.run(
-            ["powershell", "-NoProfile", "-Command",
-             "(Get-Process ZCode -ErrorAction SilentlyContinue | Select-Object -First 1).Path"],
-            capture_output=True, timeout=6)
-        exe = (r.stdout or b"").decode("utf-8", errors="ignore").strip()
-        if exe:
-            add(Path(exe).parent / "resources" / "app.asar")
-    except Exception:
-        pass
+    if sys.platform == "win32":
+        try:  # 按运行中进程的 exe 位置定位（最准）
+            r = subprocess.run(
+                ["powershell", "-NoProfile", "-Command",
+                 "(Get-Process ZCode -ErrorAction SilentlyContinue | Select-Object -First 1).Path"],
+                capture_output=True, timeout=6)
+            exe = (r.stdout or b"").decode("utf-8", errors="ignore").strip()
+            if exe:
+                add(Path(exe).parent / "resources" / "app.asar")
+        except Exception:
+            pass
     return out
 
 

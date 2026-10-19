@@ -68,7 +68,7 @@ python plugins/zcode-bg/scripts/bg_patch.py rollback   # restore
 
 - This plugin **modifies ZCode client resources**. ZCode updates overwrite the injection; re-run `apply` afterwards (your panel settings are preserved).
 - Not affiliated with ZCode. Modifying client software **may violate its terms of service**; use at your own risk.
-- UI tokens and DOM structure change between versions. **Tested with ZCode v3.14.5 (Windows)**. If a region stops responding, use the built-in color probe and file an issue with its output.
+- UI tokens and DOM structure change between versions. **Tested with ZCode v3.15.3 (Windows)**. If a region stops responding, use the built-in color probe and file an issue with its output.
 - Always fully quit ZCode before applying. `rollback` restores everything; the extracted `resources/app/` directory can safely remain.
 
 ## Uninstall

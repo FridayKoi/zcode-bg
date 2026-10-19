@@ -77,7 +77,7 @@ python plugins/zcode-bg/scripts/bg_patch.py rollback   # 还原
 - 本插件**修改 ZCode 客户端资源文件**。客户端更新会覆盖注入内容，需要重新运行
   `apply`（面板和参数会保留）。
 - 与 ZCode 官方无关；修改客户端软件**可能违反其用户协议**，使用风险自负。
-- 界面令牌与 DOM 结构随版本变化。**实测版本：ZCode v3.14.5 (Windows)**。
+- 界面令牌与 DOM 结构随版本变化。**实测版本：ZCode v3.15.3 (Windows)**。
   若某区域失效，用面板里的「取色探针」拿到类名链后提交 issue。
 - 首次应用前**务必完全退出 ZCode**；`rollback` 随时可还原，`resources/app/`
   解包目录保留不影响运行。
