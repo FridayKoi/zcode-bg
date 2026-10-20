@@ -246,61 +246,69 @@
     }
   }
 
-  /* ---------- 面板 ---------- */
+  /* ---------- 面板（ZCode 设置页风格） ---------- */
   var CSS = {
-    panel: 'position:fixed;top:44px;right:56px;z-index:2147483000;width:318px;max-height:78vh;' +
-           'overflow:auto;border-radius:16px;border:1px solid rgba(255,255,255,.10);' +
-           'background:rgba(22,22,28,.97);backdrop-filter:blur(14px);color:#e6e8ef;' +
-           'font:12.5px/1.65 system-ui,"Segoe UI",sans-serif;padding:16px;display:none;' +
-           'box-shadow:0 12px 48px rgba(0,0,0,.45);',
-    title: 'display:flex;align-items:center;gap:8px;font-weight:700;font-size:14px;margin:0 2px 4px;',
-    ver: 'font-size:10px;opacity:.35;font-weight:400;margin-left:4px;white-space:nowrap;',
-    close: 'margin-left:auto;cursor:pointer;opacity:.55;font-size:13px;width:24px;height:24px;' +
-           'display:flex;align-items:center;justify-content:center;border-radius:8px;',
-    card: 'background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.06);' +
-          'border-radius:12px;padding:12px;margin-top:10px;',
-    h: 'margin:0 0 8px;font-weight:600;font-size:11px;letter-spacing:.1em;opacity:.5;' +
-       'text-transform:uppercase;',
-    row: 'display:flex;align-items:center;gap:10px;margin:7px 0;',
-    label: 'width:78px;flex:none;opacity:.92;font-size:12px;',
+    panel: 'position:fixed;top:44px;right:24px;z-index:2147483000;width:540px;max-height:82vh;' +
+           'overflow:auto;border-radius:12px;border:1px solid rgba(255,255,255,.09);' +
+           'background:#1b1c20;color:#e8e8ea;font:13px/1.6 system-ui,"Segoe UI",sans-serif;' +
+           'padding:18px 20px 12px;display:none;box-shadow:0 16px 56px rgba(0,0,0,.5);',
+    title: 'display:flex;align-items:center;gap:8px;font-weight:600;font-size:15px;margin:0 0 6px;',
+    ver: 'font-size:11.5px;opacity:.7;font-weight:400;margin-left:4px;white-space:nowrap;' +
+         'background:rgba(255,255,255,.08);border-radius:6px;padding:1px 8px;',
+    close: 'margin-left:auto;cursor:pointer;opacity:.6;font-size:14px;width:26px;height:26px;' +
+           'display:flex;align-items:center;justify-content:center;border-radius:7px;',
+    h: 'margin:0 0 8px;font-weight:600;font-size:13px;color:#f0f0f2;',
+    desc: 'margin:0 0 10px;font-size:11.5px;color:#9a9aa2;line-height:1.55;',
+    card: 'background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.07);' +
+          'border-radius:10px;padding:12px;margin-top:16px;',
+    row: 'display:flex;align-items:center;gap:10px;margin:8px 0;',
+    label: 'width:104px;flex:none;color:#d8d8dc;font-size:12.5px;',
     range: 'flex:1;accent-color:#7aa2f7;height:3px;cursor:pointer;',
-    val: 'min-width:40px;text-align:center;background:rgba(255,255,255,.09);' +
-         'border-radius:7px;padding:2px 4px;font-variant-numeric:tabular-nums;font-size:11px;',
-    probe: 'white-space:pre-line;font:10px/1.5 Consolas,monospace;opacity:.75;margin-top:8px;' +
-           'background:rgba(0,0,0,.28);border-radius:8px;padding:8px;max-height:130px;overflow:auto;',
-    hint: 'margin-top:12px;opacity:.38;font-size:10.5px;line-height:1.5;'
+    val: 'width:52px;flex:none;text-align:center;background:rgba(255,255,255,.08);' +
+         'border:1px solid rgba(255,255,255,.10);border-radius:7px;color:#e8e8ea;' +
+         'font-size:11px;padding:3px 2px;font-variant-numeric:tabular-nums;outline:none;',
+    btn: 'cursor:pointer;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.04);' +
+         'color:#e8e8ea;border-radius:8px;padding:6px 14px;font-size:12px;',
+    probe: 'white-space:pre-line;font:10.5px/1.55 Consolas,monospace;color:#b9b9c0;margin-top:8px;' +
+           'background:rgba(0,0,0,.30);border:1px solid rgba(255,255,255,.06);border-radius:8px;' +
+           'padding:8px;max-height:140px;overflow:auto;',
+    hint: 'margin-top:8px;color:#8a8a92;font-size:11px;line-height:1.5;',
+    footer: 'display:flex;align-items:center;justify-content:space-between;margin-top:16px;' +
+            'padding-top:10px;border-top:1px solid rgba(255,255,255,.07);color:#8a8a92;font-size:11.5px;'
   };
 
   var STYLE_TEXT =
-    '#zcode-bg-panel .zbg-presets{display:flex;gap:6px;}' +
+    '#zcode-bg-panel button{font-family:inherit;}' +
+    '#zcode-bg-panel .zbg-presets{display:flex;gap:8px;}' +
     '#zcode-bg-panel .zbg-preset{flex:1;text-align:center;cursor:pointer;' +
-    'border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.07);color:#e6e8ef;' +
-    'border-radius:9px;padding:7px 0;font-size:11.5px;transition:all .15s;}' +
-    '#zcode-bg-panel .zbg-preset:hover{background:rgba(122,162,247,.22);border-color:rgba(122,162,247,.55);}' +
-    '#zcode-bg-panel .zbg-preset.active{background:rgba(122,162,247,.30);border-color:#7aa2f7;' +
-    'box-shadow:0 0 0 1px rgba(122,162,247,.35) inset;}' +
+    'border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.04);color:#e8e8ea;' +
+    'border-radius:8px;padding:8px 0;font-size:12px;transition:all .15s;}' +
+    '#zcode-bg-panel .zbg-preset:hover{background:rgba(122,162,247,.16);border-color:rgba(122,162,247,.5);}' +
+    '#zcode-bg-panel .zbg-preset.active{background:rgba(122,162,247,.26);border-color:#7aa2f7;}' +
     '#zcode-bg-panel .zbg-btn{display:inline-flex;align-items:center;justify-content:center;' +
-    'cursor:pointer;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.07);' +
-    'color:#e6e8ef;border-radius:9px;padding:6px 12px;font-size:11.5px;transition:all .15s;}' +
-    '#zcode-bg-panel .zbg-btn:hover{background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.25);}' +
+    'cursor:pointer;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.04);' +
+    'color:#e8e8ea;border-radius:8px;padding:6px 14px;font-size:12px;transition:all .15s;}' +
+    '#zcode-bg-panel .zbg-btn:hover{background:rgba(255,255,255,.10);border-color:rgba(255,255,255,.22);}' +
+    '#zcode-bg-panel .zbg-btn:disabled{opacity:.3;cursor:default;}' +
     '#zcode-bg-panel .zbg-file{display:none;}' +
-    '#zcode-bg-panel .zbg-filebtn{width:100%;}' +
-    '#zcode-bg-panel .zbg-row2{display:flex;gap:8px;margin-top:8px;}' +
-    '#zcode-bg-panel .zbg-num{width:54px;flex:none;text-align:center;background:rgba(255,255,255,.09);' +
-    'border:1px solid rgba(255,255,255,.14);border-radius:7px;color:#e6e8ef;font-size:11px;' +
+    '#zcode-bg-panel .zbg-num{width:54px;flex:none;text-align:center;background:rgba(255,255,255,.08);' +
+    'border:1px solid rgba(255,255,255,.12);border-radius:7px;color:#e8e8ea;font-size:11px;' +
     'padding:3px 2px;font-variant-numeric:tabular-nums;outline:none;}' +
     '#zcode-bg-panel .zbg-num:focus{border-color:#7aa2f7;}' +
-    '#zcode-bg-panel .zbg-link{display:flex;align-items:center;gap:8px;margin:2px 0 10px;' +
-    'padding:9px 10px;border-radius:10px;background:rgba(122,162,247,.10);' +
-    'border:1px solid rgba(122,162,247,.25);}' +
-    '#zcode-bg-panel .zbg-link .zbg-num{background:rgba(122,162,247,.12);}' +
-    '#zcode-bg-panel .zbg-linklabel{font-size:11.5px;flex:none;opacity:.95;}' +
-    '#zcode-bg-panel .zbg-slot{display:flex;align-items:center;gap:6px;margin:4px 0;}' +
-    '#zcode-bg-panel .zbg-slotlabel{width:48px;font-size:11px;opacity:.75;flex:none;}' +
-    '#zcode-bg-panel .zbg-slotinfo{flex:1;font-size:10px;opacity:.45;overflow:hidden;' +
+    '#zcode-bg-panel .zbg-link{display:flex;align-items:center;gap:10px;margin:0 0 12px;' +
+    'padding:10px 12px;border-radius:10px;background:rgba(122,162,247,.08);' +
+    'border:1px solid rgba(122,162,247,.22);}' +
+    '#zcode-bg-panel .zbg-linklabel{font-size:12.5px;flex:none;color:#cdd9ee;}' +
+    '#zcode-bg-panel .zbg-link .zbg-num{background:rgba(122,162,247,.10);}' +
+    '#zcode-bg-panel .zbg-slot{display:flex;align-items:center;gap:8px;margin:6px 0;}' +
+    '#zcode-bg-panel .zbg-slotlabel{width:52px;font-size:12px;color:#c9c9cf;flex:none;}' +
+    '#zcode-bg-panel .zbg-slotinfo{flex:1;font-size:11px;color:#8a8a92;overflow:hidden;' +
     'text-overflow:ellipsis;white-space:nowrap;}' +
-    '#zcode-bg-panel .zbg-mini{padding:3px 8px;font-size:10.5px;border-radius:7px;}' +
-    '#zcode-bg-panel .zbg-btn:disabled{opacity:.3;cursor:default;}';
+    '#zcode-bg-panel .zbg-mini{padding:4px 10px;font-size:11px;border-radius:7px;}' +
+    '#zcode-bg-panel .zbg-updinline{display:flex;gap:8px;margin:10px 0 8px;}' +
+    '#zcode-bg-panel .zbg-updinfo{font-size:11.5px;color:#9a9aa2;line-height:1.7;min-height:18px;}' +
+    '#zcode-bg-panel .zbg-footer a{color:#8ab4f8;text-decoration:none;}' +
+    '#zcode-bg-panel .zbg-footer a:hover{text-decoration:underline;}';;
 
   function el(tag, cls, text) {
     var e = document.createElement(tag);
@@ -310,6 +318,7 @@
   }
 
   var probeOut, probing = false, ov, sliders = {}, presetBtns = [], themeLine;
+  var CUR_VER = window.__zcodeBgPluginVer || String(PANEL_VER);
 
   function setPresetActive(name) {
     presetBtns.forEach(function (b) { b.classList.toggle('active', b.dataset.name === name); });
@@ -525,6 +534,73 @@
     sec3.appendChild(wpReset);
     panelEl.appendChild(sec3);
 
+    /* 插件更新（ZCode 设置页样式） */
+    var secUpd = el('div', CSS.card);
+    secUpd.appendChild(el('div', CSS.h, '插件更新'));
+    secUpd.appendChild(el('div', CSS.desc,
+      '检查 GitHub 最新 Release。更新由脚本在 ZCode 退出后完成；仅查询公开版本信息，不发送任何本地数据。'));
+    var curRow = el('div', CSS.row);
+    curRow.appendChild(el('span', CSS.label, '当前版本'));
+    curRow.appendChild(el('span', '', 'v' + CUR_VER));
+    secUpd.appendChild(curRow);
+    var latestRow = el('div', CSS.row);
+    latestRow.appendChild(el('span', CSS.label, '最新版本'));
+    var latestEl = el('span', '', '尚未检测');
+    latestRow.appendChild(latestEl);
+    secUpd.appendChild(latestRow);
+    var lastRow = el('div', CSS.row);
+    lastRow.appendChild(el('span', CSS.label, '上次检测'));
+    var lastEl = el('span', '', '—');
+    try { lastEl.textContent = JSON.parse(localStorage.getItem('zcodeBgLastCheck')) || '—'; } catch (e) {}
+    lastRow.appendChild(lastEl);
+    secUpd.appendChild(lastRow);
+    var updBtns = el('div', 'zbg-updinline');
+    var checkBtn = el('button', 'zbg-btn', '检查更新');
+    var updBtn = el('button', 'zbg-btn', '立即更新');
+    updBtns.appendChild(checkBtn); updBtns.appendChild(updBtn);
+    secUpd.appendChild(updBtns);
+    var updStatus = el('div', 'zbg-updinfo', '');
+    secUpd.appendChild(updStatus);
+    panelEl.appendChild(secUpd);
+
+    function verTuple(v) {
+      return String(v || '').replace(/^v/, '').split('.').map(function (x) { return parseInt(x, 10) || 0; });
+    }
+    function verGt(a, b) {
+      var A = verTuple(a), B = verTuple(b), n = Math.max(A.length, B.length);
+      for (var i = 0; i < n; i++) if ((A[i] || 0) !== (B[i] || 0)) return (A[i] || 0) > (B[i] || 0);
+      return false;
+    }
+    checkBtn.onclick = function () {
+      updStatus.textContent = '检查中…';
+      fetch('https://api.github.com/repos/FridayKoi/zcode-bg/releases/latest')
+        .then(function (r) { return r.json(); })
+        .then(function (d) {
+          var tag = String(d.tag_name || '').replace(/^v/, '');
+          var now = new Date().toLocaleString();
+          try { localStorage.setItem('zcodeBgLastCheck', JSON.stringify(now)); } catch (e) {}
+          lastEl.textContent = now;
+          latestEl.textContent = tag ? ('v' + tag) : '未知';
+          if (tag && verGt(tag, CUR_VER)) {
+            updStatus.textContent = '发现新版本 v' + tag + '：点“立即更新”复制更新命令，回到对话框发送即可。';
+          } else {
+            updStatus.textContent = '已是最新版本。';
+          }
+        })
+        .catch(function () {
+          updStatus.textContent = '检查失败（网络/CORS）。可在对话框发送 /bg-check-update。';
+        });
+    };
+    updBtn.onclick = function () {
+      var cmd = '/bg-update';
+      function fallback() { updStatus.textContent = '请回到对话框输入 ' + cmd + ' 并发送。'; }
+      try {
+        navigator.clipboard.writeText(cmd).then(function () {
+          updStatus.textContent = '已复制 “' + cmd + '”，回到对话框粘贴发送（会弹出更新窗口，退出 ZCode 后自动完成）。';
+        }).catch(fallback);
+      } catch (e) { fallback(); }
+    };
+
     /* 诊断卡片 */
     var sec4 = el('div', CSS.card);
     sec4.appendChild(el('div', CSS.h, '诊断'));
@@ -547,6 +623,17 @@
       '调整即时生效并自动保存；面板值优先于文件层，"全部恢复默认"回到文件层。'));
     themeLine = el('div', CSS.hint, '主题检测: …');
     panelEl.appendChild(themeLine);
+
+    var footer = el('div', 'zbg-footer', '');
+    footer.style.cssText = CSS.footer;
+    footer.appendChild(el('span', '', '✓ 所有设置已展示'));
+    var issues = document.createElement('a');
+    issues.href = 'https://github.com/FridayKoi/zcode-bg/issues';
+    issues.target = '_blank';
+    issues.textContent = '反馈问题';
+    footer.appendChild(issues);
+    panelEl.appendChild(footer);
+
     (document.body || document.documentElement).appendChild(panelEl);
 
     setPresetActive(ov && Object.keys(ov).length ? null : 'balanced');
