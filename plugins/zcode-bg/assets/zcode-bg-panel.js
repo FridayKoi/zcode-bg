@@ -290,6 +290,7 @@
     'color:#e8e8ea;border-radius:8px;padding:6px 14px;font-size:12px;transition:all .15s;}' +
     '#zcode-bg-panel .zbg-btn:hover{background:rgba(255,255,255,.10);border-color:rgba(255,255,255,.22);}' +
     '#zcode-bg-panel .zbg-btn:disabled{opacity:.3;cursor:default;}' +
+    '#zcode-bg-panel .zbg-filebtn{width:100%;margin-top:8px;}' +
     '#zcode-bg-panel .zbg-file{display:none;}' +
     '#zcode-bg-panel .zbg-num{width:54px;flex:none;text-align:center;background:rgba(255,255,255,.08);' +
     'border:1px solid rgba(255,255,255,.12);border-radius:7px;color:#e8e8ea;font-size:11px;' +
@@ -336,7 +337,7 @@
     save(LS_OV, ov);
     if (sliders[k]) {
       sliders[k].range.value = a;
-      sliders[k].num.value = a;
+      sliders[k].num.value = Number(a).toFixed(2);
     }
     setPresetActive(null);
   }
@@ -349,7 +350,7 @@
     r.style.cssText = CSS.range;
     var num = document.createElement('input');
     num.type = 'number'; num.min = 0; num.max = 0.95; num.step = 0.01;
-    num.className = 'zbg-num'; num.value = cur;
+    num.className = 'zbg-num'; num.value = Number(cur).toFixed(2);
     r.oninput = function () { setKnob(k, parseFloat(r.value)); };
     num.oninput = function () {
       var a = parseFloat(num.value);
@@ -357,7 +358,7 @@
     };
     num.onblur = function () {
       var a = parseFloat(num.value);
-      num.value = isNaN(a) ? ((ov[k] != null) ? ov[k] : PRESETS.balanced[k]) : clampAlpha(a);
+      num.value = (isNaN(a) ? ((ov[k] != null) ? ov[k] : PRESETS.balanced[k]) : clampAlpha(a)).toFixed(2);
     };
     row.appendChild(r); row.appendChild(num);
     sliders[k] = { range: r, num: num };
@@ -465,7 +466,7 @@
     ln.className = 'zbg-num'; ln.value = linkInit;
     function applyLinked(a) {
       a = clampAlpha(a);
-      ln.value = a;
+      ln.value = Number(a).toFixed(2);
       setKnob('background', a);
       setKnob('sidebar', a);
     }
@@ -478,7 +479,7 @@
       var cur = (ov[k] != null) ? ov[k] : PRESETS.balanced[k];
       sec2.appendChild(makeSliderRow(k, cur));
     });
-    sec2.appendChild(el('div', 'opacity:.38;font-size:10.5px;margin-top:6px;',
+    sec2.appendChild(el('div', 'color:#8a8a92;font-size:11px;line-height:1.6;margin-top:10px;',
       '侧栏=左侧栏独立底色 · 卡片=工作区消息/文件卡片 · 菜单=右键可见'));
     panelEl.appendChild(sec2);
 
