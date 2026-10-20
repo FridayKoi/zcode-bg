@@ -474,7 +474,17 @@ def cmd_apply(a):
             print("窗口会自动完成安装，之后重新打开 ZCode 即可看到效果。")
             return
     if disabled.exists():
-        die("补丁已启用（app.asar.disabled 已存在）。如需换主题/换图，请先 rollback 再 apply")
+        if asar.exists():
+            # 客户端更新场景：新 asar 已就位，.disabled 是旧版本遗留，归档后继续
+            stamp = time.strftime("%Y%m%d-%H%M%S")
+            stale = disabled.with_name(disabled.name + f".stale-{stamp}")
+            try:
+                disabled.rename(stale)
+                print(f"[清理] 检测到客户端更新遗留的旧 asar，已归档为 {stale.name}")
+            except Exception as e:
+                die(f"检测到更新遗留的 app.asar.disabled，但归档失败：{e}")
+        else:
+            die("补丁已启用（app.asar.disabled 已存在）。如需换主题/换图，请先 rollback 再 apply")
     if not asar.exists():
         die(f"找不到 {asar}。ZCode 换了安装位置的话，用 --asar 指定新的 resources/app.asar")
     wallpaper = Path(a.wallpaper).resolve()
@@ -557,7 +567,16 @@ def cmd_rollback(a):
             print("已弹出进度窗口：请完全退出 ZCode，窗口会自动完成还原。")
             return
     if not disabled.exists():
-        die("没有找到 app.asar.disabled，说明当前没有启用的背景补丁")
+        print("没有找到 app.asar.disabled，当前已是原版状态。")
+        return
+    if asar.exists():
+        # 客户端更新后：新 asar 才是现行版本，旧 .disabled 只能归档，绝不能覆盖
+        stamp = time.strftime("%Y%m%d-%H%M%S")
+        stale = disabled.with_name(disabled.name + f".stale-{stamp}")
+        disabled.rename(stale)
+        print(f"检测到客户端更新：新的 app.asar 保持不动，旧补丁文件已归档为 {stale.name}")
+        print("当前界面已是更新后的原版外观。")
+        return
     disabled.rename(asar)
     print(f"已还原：app.asar.disabled -> app.asar")
     print(f"解包目录 {app} 保留未动（不影响运行，下次 apply 会重新解包覆盖）")
