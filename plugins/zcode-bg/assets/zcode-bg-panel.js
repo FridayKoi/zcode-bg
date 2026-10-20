@@ -311,9 +311,13 @@
     '#zcode-bg-panel .zbg-footer a{color:#8ab4f8;text-decoration:none;}' +
     '#zcode-bg-panel .zbg-footer a:hover{text-decoration:underline;}';;
 
-  function el(tag, cls, text) {
+  function el(tag, spec, text) {
     var e = document.createElement(tag);
-    if (cls) e.className = cls;
+    if (spec) {
+      // 兼容两种调用：传的是样式串（含 : 或 ;）就写 cssText，否则当类名
+      if (spec.indexOf(':') !== -1 || spec.indexOf(';') !== -1) e.style.cssText = spec;
+      else e.className = spec;
+    }
     if (text != null) e.textContent = text;
     return e;
   }
