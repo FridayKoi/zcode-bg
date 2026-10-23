@@ -1,0 +1,19 @@
+{
+  "description": "zcode-bg: 会话启动时检测客户端更新导致的主题失效，提醒用户运行 /bg-apply 恢复（只读检测，不修改任何文件）",
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup|resume",
+        "hooks": [
+          {
+            "type": "process",
+            "command": "python3",
+            "args": ["${ZCODE_PLUGIN_ROOT}/hooks/session-start.py"],
+            "timeoutMs": 8000,
+            "statusMessage": "zcode-bg: 检查主题状态…"
+          }
+        ]
+      }
+    ]
+  }
+}
