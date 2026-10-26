@@ -216,29 +216,33 @@
     if (f) f.remove();
   }
 
-  function tick() {
-    if (!document.getElementById('zcode-bg-toolbar-btn')) {
-      var anchor = findAnchorButton();
-      if (anchor && anchor.parentNode) {
-        placeButton(anchor);
-        // 工具栏结构变化（React 重渲染/按钮增减）时自动归位
-        var parent = anchor.parentNode;
-        if (parent && !parent.__zcodeBgObserver) {
-          parent.__zcodeBgObserver = new MutationObserver(function () {
-            var a = findAnchorButton();
-            if (!a || !a.parentNode) return;
-            var b = document.getElementById('zcode-bg-toolbar-btn');
-            if (!b || b.parentNode !== a.parentNode || b.nextElementSibling !== a) {
-              placeButton(a);
-            }
-          });
-          parent.__zcodeBgObserver.observe(parent, { childList: true });
-        }
-      } else {
-        tick.tries = (tick.tries || 0) + 1;
-        if (tick.tries > 10 && !document.getElementById('zcode-bg-float-btn')) makeFloatButton();
+  var rememberedAnchor = null;   // 首次锚定的"上传"按钮节点，之后固定贴它
+
+  function ensureToolbarButton() {
+    var b = document.getElementById('zcode-bg-toolbar-btn');
+    // 记忆锚点仍在文档中：只把按钮固定在它前面，绝不重新计算
+    // （否则切换面板等瞬态下会锚到别的工具栏，比如新标签页那一条）
+    if (rememberedAnchor && rememberedAnchor.isConnected) {
+      if (!b || b.parentNode !== rememberedAnchor.parentNode ||
+          b.nextElementSibling !== rememberedAnchor) {
+        placeButton(rememberedAnchor);
       }
+      return true;
     }
+    var a = findAnchorButton();
+    if (a && a.parentNode) {
+      rememberedAnchor = a;
+      placeButton(a);
+      return true;
+    }
+    if (b) return true;   // 暂时找不到锚点：按钮保留原位，不乱动
+    tick.tries = (tick.tries || 0) + 1;
+    if (tick.tries > 10 && !document.getElementById('zcode-bg-float-btn')) makeFloatButton();
+    return false;
+  }
+
+  function tick() {
+    ensureToolbarButton();
     paintSidebar();
     if (themeLine) {
       var cls = (document.documentElement.className || '').slice(0, 70) || '(无类名)';
