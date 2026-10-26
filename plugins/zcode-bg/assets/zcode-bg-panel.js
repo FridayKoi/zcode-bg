@@ -43,6 +43,20 @@
   function load(k, fb) { try { return JSON.parse(localStorage.getItem(k)) || fb; } catch (e) { return fb; } }
   function save(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
 
+  /* 从文件层 CSS 解析某旋钮当前的真实透明度（供滑杆初值显示） */
+  function fileLayerAlpha(varNameStr) {
+    try {
+      var v = getComputedStyle(document.documentElement).getPropertyValue(varNameStr).trim();
+      var m = v.match(/rgba?\(([^)]+)\)/);
+      if (m) {
+        var parts = m[1].split(',');
+        return parseFloat(parts[3] != null ? parts[3] : 1);
+      }
+      var n = parseFloat(v);
+      return isNaN(n) ? null : n;
+    } catch (e) { return null; }
+  }
+
   function varName(k) {
     return (k === 'overlay') ? '--zcode-bg-overlay'
       : (k === 'sidebar') ? '--zcode-bg-sidebar'
@@ -63,7 +77,9 @@
     }
   }
   function bootApply() {
-    if (load(LS_PURE, false)) { applyPure(true); return; }
+    // 纯净模式是会话级的：重启后主题总是恢复（否则会静默压住后续的 apply）
+    pureOn = false;
+    try { save(LS_PURE, false); } catch (e) {}
     applyAll(load(LS_OV, {}));
     var wp = load(LS_WP, null);
     if (wp) applyWallpaper(wp);
@@ -91,6 +107,7 @@
       s.setProperty('background', 'none', 'important');
       s.setProperty('--zcode-bg-overlay', 0, 'important');
       s.setProperty('--zcode-bg-sidebar', 1, 'important');
+      clearSidebarPaint();
       pureOn = true;
       save(LS_PURE, true);
     } else {
@@ -111,9 +128,9 @@
   }
 
   /* ---------- 侧栏独立底色：宽度特征定位 + 清理误画的祖先 ---------- */
-  function paintSidebar() {
+  function findSidebarColumn() {
     var ps = document.querySelector('.group\\/purpose-section');
-    if (!ps) return;
+    if (!ps) return null;
     var W = window.innerWidth || 1280;
     var t = ps, best = null;
     while (t && t !== document.body) {
@@ -122,6 +139,26 @@
       else if (best) break;   // 越往上越宽，一旦超宽立即停：best 即侧栏柱子
       t = t.parentElement;
     }
+    return best;
+  }
+  function clearSidebarPaint() {
+    var best = findSidebarColumn();
+    if (!best) return;
+    best.style.removeProperty('background');
+    best.style.removeProperty('border-right');
+    var anc = best.parentElement;
+    while (anc && anc !== document.body) {
+      var bg = anc.style && anc.style.background;
+      if (bg && bg.indexOf('zcode-bg-tint') !== -1) {
+        anc.style.removeProperty('background');
+        anc.style.removeProperty('border-right');
+      }
+      anc = anc.parentElement;
+    }
+  }
+  function paintSidebar() {
+    if (pureOn) return;             // 纯净模式下不染色
+    var best = findSidebarColumn();
     if (!best) return;
     best.style.setProperty('background',
       'rgba(var(--zcode-bg-tint-sidebar), var(--zcode-bg-sidebar, .5))', 'important');
@@ -313,7 +350,7 @@
     '#zcode-bg-panel .zbg-updinline{display:flex;gap:8px;margin:10px 0 8px;}' +
     '#zcode-bg-panel .zbg-updinfo{font-size:11.5px;color:#9a9aa2;line-height:1.7;min-height:18px;}' +
     '#zcode-bg-panel .zbg-footer a{color:#8ab4f8;text-decoration:none;}' +
-    '#zcode-bg-panel .zbg-footer a:hover{text-decoration:underline;}';;
+    '#zcode-bg-panel .zbg-footer a:hover{text-decoration:underline;}';
 
   function el(tag, spec, text) {
     var e = document.createElement(tag);
@@ -328,6 +365,7 @@
 
   var probeOut, probing = false, ov, sliders = {}, presetBtns = [], themeLine;
   var CUR_VER = window.__zcodeBgPluginVer || String(PANEL_VER);
+  var syncLink = null;   // 联动行回写（buildPanel 内赋值）
 
   function setPresetActive(name) {
     presetBtns.forEach(function (b) { b.classList.toggle('active', b.dataset.name === name); });
@@ -347,6 +385,7 @@
       sliders[k].range.value = a;
       sliders[k].num.value = Number(a).toFixed(2);
     }
+    if (syncLink) syncLink(k, a);
     setPresetActive(null);
   }
 
@@ -407,7 +446,8 @@
         Object.keys(p).forEach(function (k) { setKnob(k, p[k]); });
         save(LS_OV, ov);
         setPresetActive(name);
-        lr.value = p.background; ln.value = p.background;
+        lr.value = Number(p.background).toFixed(2);
+        ln.value = Number(p.background).toFixed(2);
       };
       presetRow.appendChild(b);
     });
@@ -449,7 +489,10 @@
         });
         save(LS_OV, ov);
         setPresetActive(null);
-        if (snap.background != null) { lr.value = snap.background; ln.value = snap.background; }
+        if (snap.background != null) {
+          lr.value = Number(snap.background).toFixed(2);
+          ln.value = Number(snap.background).toFixed(2);
+        }
       };
       row.appendChild(info); row.appendChild(saveBtn); row.appendChild(applyBtn);
       slotWrap.appendChild(row);
@@ -465,15 +508,23 @@
     /* 联动总控：工作区 + 侧栏 */
     var linkRow = el('div', 'zbg-link');
     linkRow.appendChild(el('span', 'zbg-linklabel', '工作区+侧栏联动'));
-    var linkInit = (ov.background != null) ? ov.background : PRESETS.balanced.background;
+    var linkInit = (ov.background != null) ? ov.background
+      : (function () { var f = fileLayerAlpha('--color-background'); return (f != null) ? f : PRESETS.balanced.background; })();
     var lr = document.createElement('input');
     lr.type = 'range'; lr.min = 0; lr.max = 0.95; lr.step = 0.01; lr.value = linkInit;
     lr.style.cssText = CSS.range;
     var ln = document.createElement('input');
     ln.type = 'number'; ln.min = 0; ln.max = 0.95; ln.step = 0.01;
-    ln.className = 'zbg-num'; ln.value = linkInit;
+    ln.className = 'zbg-num'; ln.value = Number(linkInit).toFixed(2);
+    syncLink = function (k, a) {
+      if (k === 'background' || k === 'sidebar') {
+        var v = Number(a).toFixed(2);
+        lr.value = v; ln.value = v;
+      }
+    };
     function applyLinked(a) {
       a = clampAlpha(a);
+      lr.value = Number(a).toFixed(2);
       ln.value = Number(a).toFixed(2);
       setKnob('background', a);
       setKnob('sidebar', a);
