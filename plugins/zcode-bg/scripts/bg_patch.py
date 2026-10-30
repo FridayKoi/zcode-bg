@@ -487,7 +487,6 @@ def cmd_apply(a):
             die("补丁已启用（app.asar.disabled 已存在）。如需换主题/换图，请先 rollback 再 apply")
     if not asar.exists():
         die(f"找不到 {asar}。ZCode 换了安装位置的话，用 --asar 指定新的 resources/app.asar")
-    wallpaper = Path(a.wallpaper).resolve()
     if not wallpaper.exists():
         die(f"壁纸文件不存在：{wallpaper}")
     ext = wallpaper.suffix.lower().lstrip(".")
