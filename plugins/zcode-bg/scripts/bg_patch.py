@@ -689,9 +689,15 @@ def cmd_update(a):
                 print("已热替换注入的面板脚本：重启 ZCode 生效。")
                 _register_package(new_plugin, latest)
                 return
-    print("当前未启用主题补丁。插件包与记录将直接同步，主题需另行 apply：")
+    print("当前未启用主题补丁（客户端更新后的原版状态）。插件包与记录已同步，继续恢复主题...")
     _register_package(new_plugin, latest)
-    print(f'  python "{new_plugin}\\scripts\\bg_patch.py" apply --preset balanced')
+    # 已在退出流程中（--wait），顺手把主题恢复了，省去用户二次退出
+    try:
+        cmd_apply(argparse.Namespace(asar=(str(asar) if asar else None),
+                                     wallpaper=None, preset="balanced",
+                                     css=None, wait=False))
+    except SystemExit:
+        pass
 
 
 def main():
